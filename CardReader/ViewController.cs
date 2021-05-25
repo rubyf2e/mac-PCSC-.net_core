@@ -10,6 +10,9 @@ namespace CardReader
 
     public partial class ViewController : NSViewController
     {
+
+        private String CardReaderStatusWording = "讀卡機無連線";
+
         public ViewController(IntPtr handle) : base(handle)
         {
         }
@@ -17,19 +20,27 @@ namespace CardReader
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            CardstatusLabel.StringValue = "讀卡機無連線";
-            CardstatusLabel.StringValue = PrintReaderState();
-
+            CardstatusLabel.StringValue = CardReaderStatusWording;
+            CardReaderStatusWording     = PrintReaderState();
+            CardstatusLabel.StringValue = CardReaderStatusWording;
         }
+
 
 
         private string PrintReaderState()
         {
-            var ReaderStatus   = "讀卡機無連線";
+            var ReaderStatus   = "目前讀卡機狀態：";
             var contextFactory = ContextFactory.Instance;
             using (var context = contextFactory.Establish(SCardScope.System))
             {
+
                 var readerNames = context.GetReaders();
+
+                if (IsEmpty(readerNames))
+                {
+                    ReaderStatus += "讀卡機未插入";
+                    return ReaderStatus;
+                }
 
                 foreach (var readerName in readerNames)
                 {
@@ -43,19 +54,12 @@ namespace CardReader
 
 
         private string CardStatus()
-        { 
-            var ReaderCardStatus = "";
+        {
+            var ReaderCardStatus = PrintReaderState();
             var contextFactory   = ContextFactory.Instance;
             using (var context = contextFactory.Establish(SCardScope.System)) {
                 var readerNames = context.GetReaders();
-
-                if (IsEmpty(readerNames))
-                {
-                    ReaderCardStatus += "讀卡機未插入";
-                    return ReaderCardStatus;
-                }
-
-                return DisplayReaderStatus(context, readerNames);
+                return ReaderCardStatus + DisplayReaderStatus(context, readerNames);
             }
         }
 
@@ -77,7 +81,7 @@ namespace CardReader
                 }
                 catch (Exception exception)
                 {
-                    return "卡片未插入";
+                    return "\r\r卡片未插入";
                 }
             }
 
@@ -88,7 +92,7 @@ namespace CardReader
 
         private string PrintReaderStatus(ICardReader reader)
         {
-            var PrintReaderStatus = "";
+            var PrintReaderStatus = "\r\r";
 
             try
             {
