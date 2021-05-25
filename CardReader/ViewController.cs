@@ -25,11 +25,12 @@ namespace CardReader
 
         private string PrintReaderState()
         {
-            var ReaderStatus   = "目前讀卡機連線機台:";
+            var ReaderStatus   = "讀卡機無連線";
             var contextFactory = ContextFactory.Instance;
             using (var context = contextFactory.Establish(SCardScope.System))
             {
                 var readerNames = context.GetReaders();
+
                 foreach (var readerName in readerNames)
                 {
                     ReaderStatus += "\r" + readerName;
